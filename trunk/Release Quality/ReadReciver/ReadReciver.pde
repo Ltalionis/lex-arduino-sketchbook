@@ -52,6 +52,7 @@ void setup() {
 }
 
 void loop() {
+	
 	cmd=Serial.read();		//while you got some time gimme a systems report
 	if (cmd=='p')
 	{
@@ -72,7 +73,8 @@ void loop() {
 		Serial.print("\t");
 		Serial.println(ICR1, DEC);*/
 	}
-	cmd=0;
+	cmd=0;	
+	
 	switch (state)
 	{
 		case RISING: //we have just seen a rising edge
@@ -105,40 +107,8 @@ void rise()		//on the rising edge of the currently intresting pin
 void fall()		//on the falling edge of the signal
 {
 	state=FALLING;
-	time[i]=readTimer1();	// read the time since timer1 was restarted
-//	time[i]=Timer1.read();	// The function below has been ported into the
-							// the latest TimerOne class, if you have the
-							// new Timer1 lib you can use this line instead
+
+	time[i]=Timer1.read();	// Needs Timer1-v2
 	Timer1.stop();
 //	Serial.print('f');
-}
-
-unsigned long readTimer1()		//returns the value of the timer in microseconds
-{									//rember! phase and freq correct mode counts up to then down again
-	unsigned int tmp=TCNT1;
-	char scale=0;
-	switch (Timer1.clockSelectBits)
-	{
-	case 1:// no prescalse
-		scale=0;
-		break;
-	case 2:// x8 prescale
-		scale=3;
-		break;
-	case 3:// x64
-		scale=6;
-		break;
-	case 4:// x256
-		scale=8;
-		break;
-	case 5:// x1024
-		scale=10;
-		break;
-	}
-	while (TCNT1==tmp) //if the timer has not ticked yet
-	{
-		//do nothing -- max delay here is ~1023 cycles
-	}
-	tmp = (  (TCNT1>tmp) ? (tmp) : (ICR1-TCNT1)+ICR1  );//if we are counting down add the top value to how far we have counted down
-	return ((tmp*1000L)/(F_CPU /1000L))<<scale;
 }
